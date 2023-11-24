@@ -237,6 +237,18 @@ static void ipa_pci_io_resume(struct pci_dev *pci_dev)
 {
 }
 
+#ifndef CONFIG_PCI
+static inline void pci_release_region(struct pci_dev *pci_dev, int bar)
+{
+}
+
+static inline int pci_request_region(struct pci_dev *pci_dev, int bar,
+				     const char *res_name)
+{
+	return -EINVAL;
+}
+#endif
+
 /* PCI Error Recovery */
 static const struct pci_error_handlers ipa_pci_err_handler = {
 	.error_detected = ipa_pci_io_error_detected,
@@ -2035,7 +2047,7 @@ static long ipa3_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 {
 	int retval = 0;
 	u32 pyld_sz;
-	u8 header[128] = { 0 };
+	u8 header[512] = { 0 };
 	u8 *param = NULL;
 	bool is_vlan_mode;
 	struct ipa_ioc_nat_alloc_mem nat_mem;
